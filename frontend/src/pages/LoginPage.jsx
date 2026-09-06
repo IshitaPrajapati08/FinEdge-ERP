@@ -480,9 +480,15 @@ export default function LoginPage({ onAuthSuccess, isNight = false, onBgToggle }
                     </label>
                     <div className="relative">
                       <Mail
+<<<<<<< Updated upstream
                         size={17}
                         className="absolute left-3.5 top-1/2 transform -translate-y-1/2"
                         style={{ color: isNight ? '#64748b' : '#9ca3af' }}
+=======
+                        size={16}
+                        className="absolute left-3.5 top-1/2 transform -translate-y-1/2 pointer-events-none"
+                        style={{ color: isNight ? '#64748b' : '#9ca3af', zIndex: 1 }}
+>>>>>>> Stashed changes
                       />
                       <input
                         id="login-email"
@@ -491,8 +497,17 @@ export default function LoginPage({ onAuthSuccess, isNight = false, onBgToggle }
                         onChange={(e) => setLoginEmail(e.target.value)}
                         required
                         placeholder="admin@finedge.com"
+<<<<<<< Updated upstream
                         className="w-full pl-10 pr-4 py-2.5 rounded-xl border-2 focus:outline-none transition-all text-sm font-medium"
                         style={{
+=======
+                        className="login-field-input w-full rounded-xl border-2 focus:outline-none transition-all text-sm font-medium"
+                        style={{
+                          paddingLeft: '42px',
+                          paddingRight: '16px',
+                          paddingTop: '10px',
+                          paddingBottom: '10px',
+>>>>>>> Stashed changes
                           background: isNight ? '#1e2430' : '#f9f8f5',
                           borderColor: isNight ? '#334155' : '#e5e0d6',
                           color: isNight ? '#f8fafc' : '#111827',
@@ -530,9 +545,15 @@ export default function LoginPage({ onAuthSuccess, isNight = false, onBgToggle }
                     </div>
                     <div className="relative">
                       <Lock
+<<<<<<< Updated upstream
                         size={17}
                         className="absolute left-3.5 top-1/2 transform -translate-y-1/2"
                         style={{ color: isNight ? '#64748b' : '#9ca3af' }}
+=======
+                        size={16}
+                        className="absolute left-3.5 top-1/2 transform -translate-y-1/2 pointer-events-none"
+                        style={{ color: isNight ? '#64748b' : '#9ca3af', zIndex: 1 }}
+>>>>>>> Stashed changes
                       />
                       <input
                         id="login-password"
@@ -541,8 +562,17 @@ export default function LoginPage({ onAuthSuccess, isNight = false, onBgToggle }
                         onChange={(e) => setLoginPassword(e.target.value)}
                         required
                         placeholder="Enter password"
+<<<<<<< Updated upstream
                         className="w-full pl-10 pr-12 py-2.5 rounded-xl border-2 focus:outline-none transition-all text-sm font-medium"
                         style={{
+=======
+                        className="login-field-input login-field-input-with-toggle w-full rounded-xl border-2 focus:outline-none transition-all text-sm font-medium"
+                        style={{
+                          paddingLeft: '42px',
+                          paddingRight: '42px',
+                          paddingTop: '10px',
+                          paddingBottom: '10px',
+>>>>>>> Stashed changes
                           background: isNight ? '#1e2430' : '#f9f8f5',
                           borderColor: isNight ? '#334155' : '#e5e0d6',
                           color: isNight ? '#f8fafc' : '#111827',
@@ -559,7 +589,11 @@ export default function LoginPage({ onAuthSuccess, isNight = false, onBgToggle }
                       <button
                         type="button"
                         onClick={() => setShowLoginPassword(!showLoginPassword)}
+<<<<<<< Updated upstream
                         className="absolute right-3.5 top-1/2 transform -translate-y-1/2"
+=======
+                        className="login-password-toggle absolute right-3.5 top-1/2 transform -translate-y-1/2"
+>>>>>>> Stashed changes
                         style={{ background: 'none', border: 'none', cursor: 'pointer', color: isNight ? '#94a3b8' : '#9ca3af' }}
                       >
                         {showLoginPassword ? <EyeOff size={16} /> : <Eye size={16} />}
@@ -615,9 +649,15 @@ export default function LoginPage({ onAuthSuccess, isNight = false, onBgToggle }
                     </label>
                     <div className="relative">
                       <User
+<<<<<<< Updated upstream
                         size={17}
                         className="absolute left-3.5 top-1/2 transform -translate-y-1/2"
                         style={{ color: isNight ? '#64748b' : '#9ca3af' }}
+=======
+                        size={16}
+                        className="absolute left-3.5 top-1/2 transform -translate-y-1/2 pointer-events-none"
+                        style={{ color: isNight ? '#64748b' : '#9ca3af', zIndex: 1 }}
+>>>>>>> Stashed changes
                       />
                       <input
                         id="signup-name"
@@ -626,8 +666,17 @@ export default function LoginPage({ onAuthSuccess, isNight = false, onBgToggle }
                         onChange={(e) => setName(e.target.value)}
                         required
                         placeholder="John Doe"
+<<<<<<< Updated upstream
                         className="w-full pl-10 pr-4 py-2 rounded-xl border-2 focus:outline-none transition-all text-sm font-medium"
                         style={{
+=======
+                        className="login-field-input w-full rounded-xl border-2 focus:outline-none transition-all text-sm font-medium"
+                        style={{
+                          paddingLeft: '42px',
+                          paddingRight: '16px',
+                          paddingTop: '9px',
+                          paddingBottom: '9px',
+>>>>>>> Stashed changes
                           background: isNight ? '#1e2430' : '#f9f8f5',
                           borderColor: isNight ? '#334155' : '#e5e0d6',
                           color: isNight ? '#f8fafc' : '#111827',
@@ -653,9 +702,15 @@ export default function LoginPage({ onAuthSuccess, isNight = false, onBgToggle }
                     </label>
                     <div className="relative">
                       <Mail
+<<<<<<< Updated upstream
                         size={17}
                         className="absolute left-3.5 top-1/2 transform -translate-y-1/2"
                         style={{ color: isNight ? '#64748b' : '#9ca3af' }}
+=======
+                        size={16}
+                        className="absolute left-3.5 top-1/2 transform -translate-y-1/2 pointer-events-none"
+                        style={{ color: isNight ? '#64748b' : '#9ca3af', zIndex: 1 }}
+>>>>>>> Stashed changes
                       />
                       <input
                         id="signup-email"
@@ -664,8 +719,17 @@ export default function LoginPage({ onAuthSuccess, isNight = false, onBgToggle }
                         onChange={(e) => setSignupEmail(e.target.value)}
                         required
                         placeholder="john@example.com"
+<<<<<<< Updated upstream
                         className="w-full pl-10 pr-4 py-2 rounded-xl border-2 focus:outline-none transition-all text-sm font-medium"
                         style={{
+=======
+                        className="login-field-input w-full rounded-xl border-2 focus:outline-none transition-all text-sm font-medium"
+                        style={{
+                          paddingLeft: '42px',
+                          paddingRight: '16px',
+                          paddingTop: '9px',
+                          paddingBottom: '9px',
+>>>>>>> Stashed changes
                           background: isNight ? '#1e2430' : '#f9f8f5',
                           borderColor: isNight ? '#334155' : '#e5e0d6',
                           color: isNight ? '#f8fafc' : '#111827',
@@ -691,9 +755,15 @@ export default function LoginPage({ onAuthSuccess, isNight = false, onBgToggle }
                     </label>
                     <div className="relative">
                       <Lock
+<<<<<<< Updated upstream
                         size={17}
                         className="absolute left-3.5 top-1/2 transform -translate-y-1/2"
                         style={{ color: isNight ? '#64748b' : '#9ca3af' }}
+=======
+                        size={16}
+                        className="absolute left-3.5 top-1/2 transform -translate-y-1/2 pointer-events-none"
+                        style={{ color: isNight ? '#64748b' : '#9ca3af', zIndex: 1 }}
+>>>>>>> Stashed changes
                       />
                       <input
                         id="signup-password"
@@ -703,8 +773,17 @@ export default function LoginPage({ onAuthSuccess, isNight = false, onBgToggle }
                         required
                         minLength={6}
                         placeholder="Create a strong password"
+<<<<<<< Updated upstream
                         className="w-full pl-10 pr-12 py-2 rounded-xl border-2 focus:outline-none transition-all text-sm font-medium"
                         style={{
+=======
+                        className="login-field-input login-field-input-with-toggle w-full rounded-xl border-2 focus:outline-none transition-all text-sm font-medium"
+                        style={{
+                          paddingLeft: '42px',
+                          paddingRight: '42px',
+                          paddingTop: '9px',
+                          paddingBottom: '9px',
+>>>>>>> Stashed changes
                           background: isNight ? '#1e2430' : '#f9f8f5',
                           borderColor: isNight ? '#334155' : '#e5e0d6',
                           color: isNight ? '#f8fafc' : '#111827',
@@ -721,7 +800,11 @@ export default function LoginPage({ onAuthSuccess, isNight = false, onBgToggle }
                       <button
                         type="button"
                         onClick={() => setShowSignupPassword(!showSignupPassword)}
+<<<<<<< Updated upstream
                         className="absolute right-3.5 top-1/2 transform -translate-y-1/2"
+=======
+                        className="login-password-toggle absolute right-3.5 top-1/2 transform -translate-y-1/2"
+>>>>>>> Stashed changes
                         style={{ background: 'none', border: 'none', cursor: 'pointer', color: isNight ? '#94a3b8' : '#9ca3af' }}
                       >
                         {showSignupPassword ? <EyeOff size={16} /> : <Eye size={16} />}

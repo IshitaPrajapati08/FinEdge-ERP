@@ -15,19 +15,30 @@ export function calculatePurchaseTotal(lines) {
   return lines.reduce((sum, line) => sum.plus(lineTotal(line)), money(0));
 }
 
-async function requireAccount(tx, name) {
-  const account = await tx.account.findUnique({ where: { name } });
-  if (!account) {
-    throw new Error('Required account not found');
+const accountCache = new Map();
+const journalCache = new Map();
+
+async function requireAccount(client, name) {
+  if (accountCache.has(name)) {
+    return accountCache.get(name);
   }
+  const account = await client.account.findUnique({ where: { name } });
+  if (!account) {
+    throw new Error(`Required account '${name}' not found`);
+  }
+  accountCache.set(name, account);
   return account;
 }
 
-async function requireJournal(tx, name) {
-  const journal = await tx.journal.findUnique({ where: { name } });
-  if (!journal) {
-    throw new Error('Required journal not found');
+async function requireJournal(client, name) {
+  if (journalCache.has(name)) {
+    return journalCache.get(name);
   }
+  const journal = await client.journal.findUnique({ where: { name } });
+  if (!journal) {
+    throw new Error(`Required journal '${name}' not found`);
+  }
+  journalCache.set(name, journal);
   return journal;
 }
 
@@ -66,7 +77,14 @@ function serializeVendorBill(bill) {
 }
 
 export const purchaseService = {
-  async convertPurchaseOrderToVendorBill(purchaseOrderId) {
+  async convertPurchaseOrderToVendorBill(purchaseOrderId, options = {}) {
+    // 1. Pre-fetch required static accounts & journal outside transaction
+    const [purchaseExpenseAccount, creditorsAccount, journal] = await Promise.all([
+      requireAccount(prisma, 'Purchase Expense'),
+      requireAccount(prisma, 'Creditors'),
+      requireJournal(prisma, 'Purchase Journal'),
+    ]);
+
     return prisma.$transaction(
       async (tx) => {
         const po = await tx.purchaseOrder.findUnique({
@@ -95,16 +113,12 @@ export const purchaseService = {
         }
 
         const totalAmount = calculatePurchaseTotal(po.lines);
-        const purchaseExpenseAccount = await requireAccount(
-          tx,
-          'Purchase Expense'
-        );
-        const creditorsAccount = await requireAccount(tx, 'Creditors');
-        const journal = await requireJournal(tx, 'Purchase Journal');
+        const billDate = options.invoiceDate ? new Date(options.invoiceDate) : new Date();
+        const dueDate = options.dueDate ? new Date(options.dueDate) : null;
 
         const journalEntry = await accountingService.createJournalEntry(
           journal.id,
-          new Date(),
+          billDate,
           `PO-${purchaseOrderId}`,
           [
             {
@@ -124,7 +138,8 @@ export const purchaseService = {
         const vendorBill = await tx.vendorBill.create({
           data: {
             purchaseOrderId,
-            invoiceDate: new Date(),
+            invoiceDate: billDate,
+            dueDate,
             journalEntryId: journalEntry.id,
             status: 'POSTED',
           },
@@ -152,7 +167,7 @@ export const purchaseService = {
 
         return serializeVendorBill(vendorBill);
       },
-      { timeout: 20000 }
+      { maxWait: 15000, timeout: 60000 }
     );
   },
 
@@ -161,6 +176,12 @@ export const purchaseService = {
     if (!['cash', 'bank'].includes(type)) {
       throw new Error('Payment type must be cash or bank');
     }
+
+    const creditorsAccount = await requireAccount(prisma, 'Creditors');
+    const paymentAccountName = type === 'cash' ? 'Cash' : 'Bank';
+    const paymentAccount = await requireAccount(prisma, paymentAccountName);
+    const journalName = type === 'cash' ? 'Cash Journal' : 'Bank Journal';
+    const journal = await requireJournal(prisma, journalName);
 
     return prisma.$transaction(
       async (tx) => {
@@ -192,12 +213,6 @@ export const purchaseService = {
         if (paymentAmount.greaterThan(outstanding)) {
           throw new Error('Payment amount exceeds outstanding amount');
         }
-
-        const creditorsAccount = await requireAccount(tx, 'Creditors');
-        const paymentAccountName = type === 'cash' ? 'Cash' : 'Bank';
-        const paymentAccount = await requireAccount(tx, paymentAccountName);
-        const journalName = type === 'cash' ? 'Cash Journal' : 'Bank Journal';
-        const journal = await requireJournal(tx, journalName);
 
         const journalEntry = await accountingService.createJournalEntry(
           journal.id,
@@ -243,7 +258,7 @@ export const purchaseService = {
           billStatus: fullyPaid ? 'PAID' : 'POSTED',
         };
       },
-      { timeout: 20000 }
+      { maxWait: 15000, timeout: 60000 }
     );
   },
 
@@ -336,6 +351,12 @@ export const purchaseService = {
       throw new Error('Vendor not found');
     }
 
+    const productIds = lines.map((l) => l.productId).filter(Boolean);
+    const existingProducts = await prisma.product.findMany({
+      where: { id: { in: productIds } },
+    });
+    const productMap = new Map(existingProducts.map((p) => [p.id, p]));
+
     for (const line of lines) {
       if (!line.productId) {
         throw new Error('Product not found');
@@ -350,10 +371,7 @@ export const purchaseService = {
         throw new Error('Unit price cannot be negative');
       }
 
-      const product = await prisma.product.findUnique({
-        where: { id: line.productId },
-      });
-
+      const product = productMap.get(line.productId);
       if (!product) {
         throw new Error('Product not found');
       }

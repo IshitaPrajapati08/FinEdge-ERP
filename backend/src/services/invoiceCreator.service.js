@@ -1,9 +1,7 @@
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../lib/prisma.js';
 import Decimal from 'decimal.js';
 import { salesService } from './sales.service.js';
 import { purchaseService } from './purchase.service.js';
-
-const prisma = new PrismaClient();
 
 export const invoiceCreatorService = {
   /**
@@ -50,7 +48,19 @@ export const invoiceCreatorService = {
       });
     }
 
-    // 2. Resolve Products for each line item
+    // 2. Batch resolve Products by ID if present
+    const productIdsToFetch = items
+      .map((it) => parseInt(it.productId, 10))
+      .filter((id) => Number.isInteger(id) && id > 0);
+
+    let productMapById = new Map();
+    if (productIdsToFetch.length > 0) {
+      const products = await prisma.product.findMany({
+        where: { id: { in: productIdsToFetch } },
+      });
+      productMapById = new Map(products.map((p) => [p.id, p]));
+    }
+
     const resolvedLines = [];
 
     for (let i = 0; i < items.length; i++) {
@@ -63,9 +73,7 @@ export const invoiceCreatorService = {
       let product = null;
 
       if (line.productId) {
-        product = await prisma.product.findUnique({
-          where: { id: parseInt(line.productId, 10) },
-        });
+        product = productMapById.get(parseInt(line.productId, 10)) || null;
       }
 
       if (!product) {
@@ -103,7 +111,6 @@ export const invoiceCreatorService = {
 
     // 3. Create either Customer Invoice or Vendor Bill using existing services
     if (invoiceType === 'vendor_bill') {
-      // Create Purchase Order -> Confirm -> Generate Vendor Bill
       const poLines = resolvedLines.map((l) => ({
         productId: l.productId,
         qty: l.qty,
@@ -112,18 +119,10 @@ export const invoiceCreatorService = {
 
       const po = await purchaseService.createPurchaseOrder(contact.id, poLines);
       await purchaseService.confirmPurchaseOrder(po.id);
-      const bill = await purchaseService.convertPurchaseOrderToVendorBill(po.id);
-
-      // Optionally update invoiceDate/dueDate if specified
-      if (invoiceDate || dueDate) {
-        await prisma.vendorBill.update({
-          where: { id: bill.id },
-          data: {
-            invoiceDate: invoiceDate ? new Date(invoiceDate) : undefined,
-            dueDate: dueDate ? new Date(dueDate) : undefined,
-          },
-        });
-      }
+      const bill = await purchaseService.convertPurchaseOrderToVendorBill(po.id, {
+        invoiceDate,
+        dueDate,
+      });
 
       return {
         success: true,
@@ -136,7 +135,6 @@ export const invoiceCreatorService = {
         date: invoiceDate || new Date().toISOString().split('T')[0],
       };
     } else {
-      // Customer Invoice: Create Sales Order -> Confirm -> Generate Invoice
       const soLines = resolvedLines.map((l) => ({
         productId: l.productId,
         qty: l.qty,
@@ -146,17 +144,10 @@ export const invoiceCreatorService = {
 
       const so = await salesService.createSalesOrder(contact.id, soLines);
       await salesService.confirmSalesOrder(so.id);
-      const invoice = await salesService.generateCustomerInvoice(so.id);
-
-      if (invoiceDate || dueDate) {
-        await prisma.customerInvoice.update({
-          where: { id: invoice.id },
-          data: {
-            invoiceDate: invoiceDate ? new Date(invoiceDate) : undefined,
-            dueDate: dueDate ? new Date(dueDate) : undefined,
-          },
-        });
-      }
+      const invoice = await salesService.generateCustomerInvoice(so.id, {
+        invoiceDate,
+        dueDate,
+      });
 
       return {
         success: true,

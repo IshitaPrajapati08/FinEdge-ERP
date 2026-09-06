@@ -30,19 +30,30 @@ export function calculateSalesTotals(lines) {
   };
 }
 
-async function requireAccount(tx, name) {
-  const account = await tx.account.findUnique({ where: { name } });
-  if (!account) {
-    throw new Error('Required account not found');
+const accountCache = new Map();
+const journalCache = new Map();
+
+async function requireAccount(client, name) {
+  if (accountCache.has(name)) {
+    return accountCache.get(name);
   }
+  const account = await client.account.findUnique({ where: { name } });
+  if (!account) {
+    throw new Error(`Required account '${name}' not found`);
+  }
+  accountCache.set(name, account);
   return account;
 }
 
-async function requireJournal(tx, name) {
-  const journal = await tx.journal.findUnique({ where: { name } });
-  if (!journal) {
-    throw new Error('Required journal not found');
+async function requireJournal(client, name) {
+  if (journalCache.has(name)) {
+    return journalCache.get(name);
   }
+  const journal = await client.journal.findUnique({ where: { name } });
+  if (!journal) {
+    throw new Error(`Required journal '${name}' not found`);
+  }
+  journalCache.set(name, journal);
   return journal;
 }
 
@@ -73,14 +84,19 @@ function serializeCustomerInvoice(invoice) {
   const totals = invoiceTotals(invoice);
   const paid = paymentsSum(invoice.payments);
   const outstanding = totals.total.minus(paid);
-  return {
+  
+  // Serialize nested objects to ensure JSON compatibility
+  return JSON.parse(JSON.stringify({
     ...invoice,
     subtotal: moneyStr(totals.subtotal),
     taxTotal: moneyStr(totals.tax),
     total: moneyStr(totals.total),
     amountPaid: moneyStr(paid),
     outstanding: moneyStr(outstanding),
-  };
+    invoiceDate: invoice.invoiceDate ? invoice.invoiceDate.toISOString() : null,
+    createdAt: invoice.createdAt ? invoice.createdAt.toISOString() : null,
+    updatedAt: invoice.updatedAt ? invoice.updatedAt.toISOString() : null,
+  }));
 }
 
 export const salesService = {
@@ -105,6 +121,12 @@ export const salesService = {
       throw new Error('Customer not found');
     }
 
+    const productIds = lines.map((l) => l.productId).filter(Boolean);
+    const existingProducts = await prisma.product.findMany({
+      where: { id: { in: productIds } },
+    });
+    const productMap = new Map(existingProducts.map((p) => [p.id, p]));
+
     for (const line of lines) {
       if (!line.productId) {
         throw new Error('Product not found');
@@ -123,10 +145,7 @@ export const salesService = {
         throw new Error('Tax cannot be negative');
       }
 
-      const product = await prisma.product.findUnique({
-        where: { id: line.productId },
-      });
-
+      const product = productMap.get(line.productId);
       if (!product) {
         throw new Error('Product not found');
       }
@@ -186,7 +205,14 @@ export const salesService = {
    * That total is posted to Debtors / Sales Income.
    * There is no dedicated Tax/GST account.
    */
-  async generateCustomerInvoice(salesOrderId) {
+  async generateCustomerInvoice(salesOrderId, options = {}) {
+    // 1. Pre-fetch required static accounts & journal outside transaction
+    const [debtorsAccount, salesIncomeAccount, journal] = await Promise.all([
+      requireAccount(prisma, 'Debtors'),
+      requireAccount(prisma, 'Sales Income'),
+      requireJournal(prisma, 'Sales Journal'),
+    ]);
+
     return prisma.$transaction(
       async (tx) => {
         const so = await tx.salesOrder.findUnique({
@@ -215,13 +241,12 @@ export const salesService = {
         }
 
         const totals = calculateSalesTotals(so.lines);
-        const debtorsAccount = await requireAccount(tx, 'Debtors');
-        const salesIncomeAccount = await requireAccount(tx, 'Sales Income');
-        const journal = await requireJournal(tx, 'Sales Journal');
+        const invoiceDate = options.invoiceDate ? new Date(options.invoiceDate) : new Date();
+        const dueDate = options.dueDate ? new Date(options.dueDate) : null;
 
         const journalEntry = await accountingService.createJournalEntry(
           journal.id,
-          new Date(),
+          invoiceDate,
           `SO-${salesOrderId}`,
           [
             {
@@ -241,7 +266,8 @@ export const salesService = {
         const invoice = await tx.customerInvoice.create({
           data: {
             salesOrderId,
-            invoiceDate: new Date(),
+            invoiceDate,
+            dueDate,
             journalEntryId: journalEntry.id,
             status: 'POSTED',
           },
@@ -269,7 +295,7 @@ export const salesService = {
 
         return serializeCustomerInvoice(invoice);
       },
-      { timeout: 20000 }
+      { maxWait: 15000, timeout: 60000 }
     );
   },
 
@@ -278,6 +304,12 @@ export const salesService = {
     if (!['cash', 'bank'].includes(type)) {
       throw new Error('Payment type must be cash or bank');
     }
+
+    const debtorsAccount = await requireAccount(prisma, 'Debtors');
+    const paymentAccountName = type === 'cash' ? 'Cash' : 'Bank';
+    const paymentAccount = await requireAccount(prisma, paymentAccountName);
+    const journalName = type === 'cash' ? 'Cash Journal' : 'Bank Journal';
+    const journal = await requireJournal(prisma, journalName);
 
     return prisma.$transaction(
       async (tx) => {
@@ -309,12 +341,6 @@ export const salesService = {
         if (paymentAmount.greaterThan(outstanding)) {
           throw new Error('Payment amount exceeds outstanding amount');
         }
-
-        const debtorsAccount = await requireAccount(tx, 'Debtors');
-        const paymentAccountName = type === 'cash' ? 'Cash' : 'Bank';
-        const paymentAccount = await requireAccount(tx, paymentAccountName);
-        const journalName = type === 'cash' ? 'Cash Journal' : 'Bank Journal';
-        const journal = await requireJournal(tx, journalName);
 
         const journalEntry = await accountingService.createJournalEntry(
           journal.id,
@@ -363,7 +389,7 @@ export const salesService = {
           invoiceStatus: fullyPaid ? 'PAID' : 'POSTED',
         };
       },
-      { timeout: 20000 }
+      { maxWait: 15000, timeout: 60000 }
     );
   },
 

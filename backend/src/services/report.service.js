@@ -148,11 +148,12 @@ export const reportService = {
     for (const accountId in accountBalances) {
       const { account, debit, credit } = accountBalances[accountId];
       const balance = accountBalance(account.type, debit, credit);
+      const displayBalance = balance.lessThan(0) ? money(0) : balance;
 
-      if (account.name === 'Cash') cashBalance = balance;
-      if (account.name === 'Bank') bankBalance = balance;
-      if (account.name === 'Debtors') receivables = balance;
-      if (account.name === 'Creditors') payables = balance;
+      if (account.name === 'Cash') cashBalance = displayBalance;
+      if (account.name === 'Bank') bankBalance = displayBalance;
+      if (account.name === 'Debtors') receivables = displayBalance;
+      if (account.name === 'Creditors') payables = displayBalance;
     }
 
     const recentJournalEntries = await prisma.journalEntry.findMany({

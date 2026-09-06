@@ -57,7 +57,11 @@ function formatDate() {
 /* ══════════════════════════════════════════════════════════════════
    RoleDropdown — self-contained, click-outside-aware
 ══════════════════════════════════════════════════════════════════ */
+<<<<<<< Updated upstream
 function RoleDropdown({ currentUser, onUserChange, sessionUser, onLogout }) {
+=======
+function RoleDropdown({ currentUser, onUserChange, isNight = false, sessionUser, onLogout }) {
+>>>>>>> Stashed changes
   const [open, setOpen] = useState(false);
   const wrapperRef = useRef(null);
 
@@ -131,7 +135,7 @@ function RoleDropdown({ currentUser, onUserChange, sessionUser, onLogout }) {
             margin: 0, fontSize: 10, color: '#999',
             lineHeight: 1.2, whiteSpace: 'nowrap',
           }}>
-            {active.subtitle}
+            {sessionUser?.email || active.subtitle}
           </p>
         </div>
 
@@ -267,10 +271,21 @@ function RoleDropdown({ currentUser, onUserChange, sessionUser, onLogout }) {
             );
           })}
 
+<<<<<<< Updated upstream
           {/* Logout button */}
           {onLogout && (
             <div style={{ padding: '6px', borderTop: '1px solid #f5f2ec' }}>
               <button
+=======
+          {/* Sign Out button */}
+          {onLogout && (
+            <div style={{
+              padding: '6px',
+              borderTop: isNight ? '1px solid rgba(255,255,255,0.08)' : '1px solid #f5f2ec',
+            }}>
+              <button
+                type="button"
+>>>>>>> Stashed changes
                 onClick={() => { setOpen(false); onLogout(); }}
                 style={{
                   width: '100%',
@@ -286,9 +301,16 @@ function RoleDropdown({ currentUser, onUserChange, sessionUser, onLogout }) {
                   fontSize: 12.5,
                   fontWeight: 600,
                   textAlign: 'left',
+<<<<<<< Updated upstream
                   transition: 'background 0.15s',
                 }}
                 onMouseEnter={e => e.currentTarget.style.background = '#fef2f2'}
+=======
+                  fontFamily: 'inherit',
+                  transition: 'background 0.15s',
+                }}
+                onMouseEnter={e => e.currentTarget.style.background = isNight ? 'rgba(220,38,38,0.15)' : '#fef2f2'}
+>>>>>>> Stashed changes
                 onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
               >
                 <LogOut size={14} />
@@ -313,10 +335,41 @@ function RoleDropdown({ currentUser, onUserChange, sessionUser, onLogout }) {
 /* ══════════════════════════════════════════════════════════════════
    Topbar — unchanged except user profile replaced with RoleDropdown
 ══════════════════════════════════════════════════════════════════ */
+<<<<<<< Updated upstream
 export default function Topbar({ currentPage, currentUser, onUserChange, isNight = false, onBgToggle, sessionUser, onLogout }) {
   const [query, setQuery] = useState('');
   const [searchFocused, setSearchFocused] = useState(false);
 
+=======
+export default function Topbar({ currentPage, currentUser, onUserChange, onNavigate, isNight = false, onBgToggle, sessionUser, onLogout }) {
+  const [query, setQuery] = useState('');
+  const [searchFocused, setSearchFocused] = useState(false);
+
+  const searchResults = Object.entries(PAGE_LABELS)
+    .filter(([, label]) => label.toLowerCase().includes(query.trim().toLowerCase()))
+    .slice(0, 6);
+
+  /* ── Theme-derived tokens ──────────────────────────────────── */
+  const headerBg     = isNight ? 'rgba(18, 22, 26, 0.62)' : 'rgba(246, 241, 234, 0.62)';
+  const headerBorder = isNight ? 'rgba(245, 242, 236, 0.10)' : 'rgba(220, 210, 195, 0.55)';
+  const dividerColor = isNight ? 'rgba(245,242,236,0.12)' : 'rgba(210,200,185,0.50)';
+
+  const textPrimary   = isNight ? '#F5F2EC' : '#1a1714';
+  const textSubtitle  = isNight ? '#C8C4BC' : '#5a5248';
+  const textDate      = isNight ? '#D8D3CB' : '#3d3830';
+  const textSearch    = isNight ? '#F5F2EC' : '#1a1714';
+  const textSearchPh  = isNight ? '#807B72' : '#9a9080';
+
+  const searchBg      = isNight
+    ? (searchFocused ? 'rgba(28,35,39,0.85)' : 'rgba(28,35,39,0.55)')
+    : (searchFocused ? 'rgba(255,255,255,0.85)' : 'rgba(246,241,234,0.70)');
+  const searchBorder  = searchFocused ? '#1F8A68' : (isNight ? 'rgba(245,242,236,0.14)' : 'rgba(210,200,185,0.65)');
+  const searchShadow  = searchFocused ? `0 0 0 3px ${isNight ? 'rgba(31,138,104,0.18)' : 'rgba(15,106,75,0.10)'}` : 'none';
+
+  const datePillBg    = isNight ? 'rgba(28,35,39,0.55)' : 'rgba(240,237,230,0.75)';
+  const datePillBdr   = isNight ? 'rgba(245,242,236,0.12)' : 'rgba(210,200,185,0.60)';
+
+>>>>>>> Stashed changes
   return (
     <header
       className="fixed top-0 left-0 md:left-[252px] right-0 h-14 z-30
@@ -342,8 +395,13 @@ export default function Topbar({ currentPage, currentUser, onUserChange, isNight
       {/* Divider */}
       <div className="hidden md:block h-6 w-px bg-stone-200 flex-shrink-0" />
 
+<<<<<<< Updated upstream
       {/* ── Search ────────────────────────────────────────────── */}
       <div className="flex-1 max-w-[320px]">
+=======
+      {/* ── Search ──────────────────────────────────────────────── */}
+      <div className="flex-1 max-w-[320px]" style={{ position: 'relative' }}>
+>>>>>>> Stashed changes
         <div
           className="flex items-center gap-2 px-3 py-2 rounded-xl transition-all duration-150"
           style={{
@@ -354,6 +412,7 @@ export default function Topbar({ currentPage, currentUser, onUserChange, isNight
         >
           <Search size={13} style={{ color: '#aaa', flexShrink: 0 }} />
           <input
+            className="topbar-search"
             type="text"
             value={query}
             onChange={e => setQuery(e.target.value)}
@@ -379,6 +438,39 @@ export default function Topbar({ currentPage, currentUser, onUserChange, isNight
             </button>
           )}
         </div>
+        {searchFocused && query.trim() && (
+          <div style={{
+            position: 'absolute', top: 58, left: 0, right: 0, zIndex: 50,
+            padding: 6, borderRadius: 14,
+            background: isNight ? 'rgba(22,28,31,0.96)' : 'rgba(255,255,255,0.96)',
+            border: `1px solid ${isNight ? 'rgba(245,242,236,0.14)' : '#e5e0d6'}`,
+            boxShadow: '0 12px 28px rgba(30,25,20,0.16)',
+            backdropFilter: 'blur(18px)',
+          }}>
+            {searchResults.length ? searchResults.map(([page, label]) => (
+              <button
+                key={page}
+                type="button"
+                onMouseDown={() => {
+                  onNavigate?.(page);
+                  setQuery('');
+                  setSearchFocused(false);
+                }}
+                style={{
+                  width: '100%', padding: '9px 10px', border: 'none', boxShadow: 'none',
+                  borderRadius: 9, background: 'transparent', color: textPrimary,
+                  textAlign: 'left', cursor: 'pointer', fontSize: 12.5,
+                }}
+              >
+                {label}
+              </button>
+            )) : (
+              <div style={{ padding: '10px', color: textSubtitle, fontSize: 12 }}>
+                No existing entry found
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Spacer */}
@@ -427,6 +519,7 @@ export default function Topbar({ currentPage, currentUser, onUserChange, isNight
         }
       </button>
 
+<<<<<<< Updated upstream
       {/* ── Notifications ─────────────────────────────────────── */}
       <button
         className="relative w-9 h-9 flex items-center justify-center rounded-xl flex-shrink-0"
@@ -446,6 +539,13 @@ export default function Topbar({ currentPage, currentUser, onUserChange, isNight
       <RoleDropdown
         currentUser={currentUser}
         onUserChange={onUserChange}
+=======
+      {/* ── Role dropdown ───────────────────────────────────────── */}
+      <RoleDropdown
+        currentUser={currentUser}
+        onUserChange={onUserChange}
+        isNight={isNight}
+>>>>>>> Stashed changes
         sessionUser={sessionUser}
         onLogout={onLogout}
       />

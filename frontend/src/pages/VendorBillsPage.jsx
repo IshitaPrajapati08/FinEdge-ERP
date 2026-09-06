@@ -33,12 +33,19 @@ export default function VendorBillsPage({ onNavigate, currentUser }) {
     
     try {
       if (!paymentData.amount || parseFloat(paymentData.amount) <= 0) {
+<<<<<<< Updated upstream
         toast.warning('Please enter a valid payment amount.');
         return;
       }
       
       // Make the payment request
       const response = await vendorBillsAPI.pay(billId, {
+=======
+        setError('Enter a payment amount greater than 0');
+        return;
+      }
+      await vendorBillsAPI.pay(billId, {
+>>>>>>> Stashed changes
         amount: parseFloat(paymentData.amount),
         paymentType: paymentData.paymentType,
       });
@@ -51,11 +58,21 @@ export default function VendorBillsPage({ onNavigate, currentUser }) {
       // Reload bills to show updated status
       await loadBills();
     } catch (err) {
+<<<<<<< Updated upstream
       console.error('Payment error:', err);
       const msg = err.response?.data?.error || err.message || 'Payment failed';
       setError(msg);
       toast.error(msg);
+=======
+      setError(err.response?.data?.error || 'Unable to record payment');
+>>>>>>> Stashed changes
     }
+  };
+
+  const openBill = (bill) => {
+    setSelectedBill(bill.id);
+    setPaymentData({ amount: bill.outstanding || bill.total || '', paymentType: 'bank' });
+    setError(null);
   };
 
   if (loading) return <div className="loading">Loading vendor bills…</div>;
@@ -246,7 +263,7 @@ export default function VendorBillsPage({ onNavigate, currentUser }) {
                     <span className="status-badge draft">{bill.payments.length} payment{bill.payments.length !== 1 ? 's' : ''}</span>
                   </td>
                   <td>
-                    <button onClick={() => setSelectedBill(bill.id)}
+                    <button onClick={() => openBill(bill)}
                       style={{ padding: '5px 14px', fontSize: '12px' }}>
                       View
                     </button>

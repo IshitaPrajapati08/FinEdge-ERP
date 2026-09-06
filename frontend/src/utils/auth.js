@@ -106,7 +106,10 @@ export const setupAuthInterceptor = (axiosInstance) => {
       if (error.response?.status === 401) {
         // Token expired or invalid
         authUtils.clearAuth();
+<<<<<<< Updated upstream
         window.location.href = '/login';
+=======
+>>>>>>> Stashed changes
       }
       return Promise.reject(error);
     }

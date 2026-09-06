@@ -92,6 +92,7 @@ export default function Dashboard({ onNavigate, currentUser }) {
         </div>
       </div>
 
+<<<<<<< Updated upstream
       {/* ── Quick Action for Accountant/Admin ───────────────────── */}
       {isAuthorizedRole && (
         <div
@@ -124,6 +125,77 @@ export default function Dashboard({ onNavigate, currentUser }) {
             >
               <ScanLine size={20} />
             </div>
+=======
+      {/* ── Hero spacer — showroom is the landing visual ─────── */}
+      {/* The spacer pushes KPI cards to ~40vh from the top of the viewport.
+          The topbar is fixed at 56px (pt-14) and the container padding is 20px,
+          so 40vh minus those offsets gives the right visual landing position.   */}
+      <div style={{ paddingTop: 'calc(40vh - 76px)' }}>
+
+        {error && (
+          <div
+            className="error"
+            style={{
+              borderRadius: 16,
+              backdropFilter: 'blur(22px)',
+              background: isNight ? 'rgba(239, 68, 68, 0.15)' : 'rgba(192, 57, 43, 0.12)',
+              border: `1px solid ${isNight ? 'rgba(239, 68, 68, 0.30)' : 'rgba(192, 57, 43, 0.25)'}`,
+              color: isNight ? '#f87171' : '#c0392b',
+              marginBottom: 20,
+            }}
+          >
+            {error}
+          </div>
+        )}
+
+        {/* ── KPI cards (Matte Frosted with Hover Lift) ──────── */}
+        <div className="dashboard-grid">
+          {KPI_META.map(({ key, label, icon: Icon, color, bg }) => {
+            const activeColor = isNight && (key === 'revenue' || key === 'cashBalance') ? '#34d399' :
+                                isNight && (key === 'bankBalance' || key === 'receivables') ? '#fbbf24' :
+                                isNight && (key === 'expenses' || key === 'payables') ? '#f87171' :
+                                isNight && key === 'netProfit' ? '#60a5fa' : color;
+
+            const activeBg = isNight ? 'rgba(255, 255, 255, 0.08)' : bg;
+
+            return (
+              <div className="card matte-kpi-card" key={key} style={{ ...matteCard, padding: '22px 24px', cursor: 'default' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 9, marginBottom: 14 }}>
+                  <div style={{
+                    width: 28, height: 28, borderRadius: 8,
+                    background: activeBg, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    flexShrink: 0,
+                    border: `1px solid ${isNight ? 'rgba(255, 255, 255, 0.07)' : 'rgba(0, 0, 0, 0.04)'}`,
+                  }}>
+                    <Icon size={14} style={{ color: activeColor }} />
+                  </div>
+                  <span className="card-title" style={{
+                    margin: 0,
+                    fontSize: '11px',
+                    fontWeight: 700,
+                    letterSpacing: '0.65px',
+                    color: isNight ? '#F5F2EC' : '#111827',
+                    textTransform: 'uppercase',
+                  }}>
+                    {label}
+                  </span>
+                </div>
+                <div className="card-value dashboard-kpi-value" style={{
+                  fontWeight: 800,
+                  color: activeColor,
+                  lineHeight: 1.15,
+                }}>
+                  ₹{parseFloat(summary[key] ?? 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* ── Recent Transactions ────────────────────────────── */}
+        <div className="page-card" style={{ ...matteCard, padding: '26px 28px', marginTop: 20 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18, flexWrap: 'wrap', gap: 8 }}>
+>>>>>>> Stashed changes
             <div>
               <h3 style={{ margin: 0, fontSize: 14.5, fontWeight: 700, color: '#0F6A4B' }}>
                 AI Invoice Scanner

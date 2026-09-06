@@ -35,7 +35,11 @@ export default function CustomerInvoicesPage({ onNavigate, currentUser }) {
     
     try {
       if (!paymentData.amount || parseFloat(paymentData.amount) <= 0) {
+<<<<<<< Updated upstream
         toast.warning('Please enter a valid payment amount.');
+=======
+        setError('Enter a payment amount greater than 0');
+>>>>>>> Stashed changes
         return;
       }
       
@@ -53,11 +57,21 @@ export default function CustomerInvoicesPage({ onNavigate, currentUser }) {
       // Reload invoices to show updated status
       await loadInvoices();
     } catch (err) {
+<<<<<<< Updated upstream
       console.error('Payment error:', err);
       const msg = err.response?.data?.error || err.message || 'Payment failed';
       setError(msg);
       toast.error(msg);
+=======
+      setError(err.response?.data?.error || 'Unable to record payment');
+>>>>>>> Stashed changes
     }
+  };
+
+  const openInvoice = (invoice) => {
+    setSelectedInvoice(invoice.id);
+    setPaymentData({ amount: invoice.outstanding || invoice.total || '', paymentType: 'bank' });
+    setError(null);
   };
 
   if (loading) return <div className="loading">Loading customer invoices…</div>;
@@ -295,7 +309,7 @@ export default function CustomerInvoicesPage({ onNavigate, currentUser }) {
                     </td>
                     <td>
                       <button
-                        onClick={() => setSelectedInvoice(inv.id)}
+                        onClick={() => openInvoice(inv)}
                         style={{ padding: '5px 14px', fontSize: '12px' }}
                       >
                         View

@@ -84,7 +84,6 @@ export default function ContactsPage() {
                   onChange={e => setFormData({ ...formData, type: e.target.value })}>
                   <option value="customer">Customer</option>
                   <option value="vendor">Vendor</option>
-                  <option value="both">Both</option>
                 </select>
               </div>
               <div className="form-group" style={{ marginBottom: 0 }}>

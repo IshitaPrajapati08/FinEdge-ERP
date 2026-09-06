@@ -201,7 +201,50 @@ textarea:focus {
   background: #fff;
 }
 
+<<<<<<< Updated upstream
 /* Buttons — primary (default) */
+=======
+/* Keep login icons and text in separate, predictable spaces. */
+.login-field-input {
+  padding-left: 44px;
+}
+
+.login-field-input-with-toggle {
+  padding-right: 52px;
+}
+
+.login-password-toggle {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: none;
+}
+
+[data-theme="night"] input,
+[data-theme="night"] select,
+[data-theme="night"] textarea {
+  background: rgba(28, 35, 39, 0.60);
+  border-color: rgba(245, 242, 236, 0.15);
+  color: #F5F2EC;
+}
+[data-theme="night"] input::placeholder,
+[data-theme="night"] textarea::placeholder { color: #807B72; }
+[data-theme="night"] input:focus,
+[data-theme="night"] select:focus,
+[data-theme="night"] textarea:focus {
+  background: rgba(28, 35, 39, 0.85);
+  border-color: #1F8A68;
+  box-shadow: 0 0 0 3px rgba(31, 138, 104, 0.18);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   BUTTONS
+═══════════════════════════════════════════════════════════════════ */
+
+>>>>>>> Stashed changes
 button {
   background-color: #0F6A4B;
   color: white;
@@ -329,6 +372,24 @@ tbody tr:hover {
   letter-spacing: -0.5px;
 }
 
+.dashboard-kpi-value {
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 24px;
+  letter-spacing: -0.4px;
+}
+
+@media (max-width: 1200px) {
+  .dashboard-kpi-value { font-size: 20px; }
+}
+
+@media (max-width: 700px) {
+  .dashboard-kpi-value { font-size: 18px; }
+}
+
 .dashboard-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -347,6 +408,7 @@ tbody tr:hover {
   letter-spacing: 0.2px;
 }
 
+<<<<<<< Updated upstream
 .status-badge.draft     { background: #f0ede6; color: #7a6a50; }
 .status-badge.confirmed { background: #e6f5ef; color: #0F6A4B; }
 .status-badge.billed    { background: #e6f5ef; color: #0F6A4B; }
@@ -364,6 +426,31 @@ tbody tr:hover {
 .status-badge.capital   { background: #f3e8ff; color: #7c3aed; }
 .status-badge.bank      { background: #e8f0fe; color: #1a56db; }
 .status-badge.cash      { background: #e6f5ef; color: #0F6A4B; }
+=======
+.status-badge.draft     { background: rgba(240,237,230,0.85); color: #7a6a50; }
+.status-badge.confirmed { background: rgba(230,245,239,0.85); color: #0F6A4B; }
+.status-badge.billed    { background: rgba(230,245,239,0.85); color: #0F6A4B; }
+.status-badge.invoiced  { background: rgba(230,245,239,0.85); color: #0F6A4B; }
+.status-badge.paid      { background: rgba(230,245,239,0.85); color: #0F6A4B; }
+.status-badge.posted    { background: rgba(230,245,239,0.85); color: #0F6A4B; }
+.status-badge.unpaid    { background: rgba(254,240,238,0.85); color: #c0392b; }
+.status-badge.customer  { background: rgba(232,240,254,0.85); color: #1a56db; }
+.status-badge.vendor    { background: rgba(243,232,255,0.85); color: #7c3aed; }
+.status-badge.both      { background: rgba(254,243,226,0.85); color: #c47a1a; }
+.status-badge.asset     { background: rgba(232,240,254,0.85); color: #1a56db; }
+.status-badge.liability { background: rgba(254,240,238,0.85); color: #c0392b; }
+.status-badge.expense   { background: rgba(255,243,224,0.85); color: #e65c00; }
+.status-badge.income    { background: rgba(230,245,239,0.85); color: #0F6A4B; }
+.status-badge.capital   { background: rgba(243,232,255,0.85); color: #7c3aed; }
+.status-badge.bank      { background: rgba(232,240,254,0.85); color: #1a56db; }
+.status-badge.cash      { background: rgba(230,245,239,0.85); color: #0F6A4B; }
+.status-badge.purchase  { background: rgba(255,243,224,0.85); color: #c47a1a; }
+.status-badge.sales     { background: rgba(243,232,255,0.85); color: #7c3aed; }
+
+/* ═══════════════════════════════════════════════════════════════════
+   ALERTS
+═══════════════════════════════════════════════════════════════════ */
+>>>>>>> Stashed changes
 
 /* Alerts */
 .error {
@@ -429,3 +516,14 @@ tbody tr:hover {
 /* header/nav tags — kept so Tailwind doesn't clobber them if any stray */
 header { background: transparent; }
 nav    { background: transparent; }
+
+/* ── Login page input field styling ───────────────────────────── */
+.login-field-input {
+  padding-left: 42px !important;
+  padding-right: 16px !important;
+}
+
+.login-field-input.login-field-input-with-toggle {
+  padding-right: 42px !important;
+}
+

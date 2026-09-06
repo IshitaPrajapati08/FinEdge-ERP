@@ -91,9 +91,15 @@ model JournalItem {
   entryId   Int
   entry     JournalEntry @relation(fields: [entryId], references: [id], onDelete: Cascade)
   accountId Int
+<<<<<<< Updated upstream
   account   Account      @relation(fields: [accountId], references: [id])
   debit     Decimal      @db.Decimal(12, 2)
   credit    Decimal      @db.Decimal(12, 2)
+=======
+  account   Account @relation(fields: [accountId], references: [id])
+  debit     Decimal @default(0) @db.Decimal(12, 2)
+  credit    Decimal @default(0) @db.Decimal(12, 2)
+>>>>>>> Stashed changes
 
   createdAt DateTime     @default(now())
   updatedAt DateTime     @updatedAt

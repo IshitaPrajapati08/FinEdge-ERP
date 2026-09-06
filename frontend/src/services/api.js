@@ -19,7 +19,10 @@ api.interceptors.request.use((config) => {
   if (token) {
     config.headers['Authorization'] = `Bearer ${token}`;
   }
+<<<<<<< Updated upstream
   
+=======
+>>>>>>> Stashed changes
   if (currentUserId) {
     config.headers['X-User-Id'] = String(currentUserId);
   }
@@ -27,7 +30,10 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+<<<<<<< Updated upstream
 // Handle auth errors
+=======
+>>>>>>> Stashed changes
 api.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -119,6 +125,7 @@ export const paymentsAPI = {
 export const journalEntriesAPI = {
   getAll: () => api.get('/journal-entries'),
   getById: (id) => api.get(`/journal-entries/${id}`),
+  update: (id, data) => api.patch(`/journal-entries/${id}`, data),
 };
 
 export const reportsAPI = {

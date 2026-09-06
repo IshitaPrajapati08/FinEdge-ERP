@@ -1,6 +1,9 @@
 import { prisma } from '../lib/prisma.js';
 import { money, moneyStr } from '../lib/money.js';
 
+const journalByIdCache = new Map();
+const accountByIdCache = new Map();
+
 /**
  * Central accounting engine.
  * The ONLY module allowed to create JournalEntry and JournalItem records.
@@ -32,12 +35,31 @@ export const accountingService = {
         throw new Error('At least two journal items are required');
       }
 
-      const journal = await tx.journal.findUnique({
-        where: { id: journalId },
-      });
+      let journal = journalByIdCache.get(journalId);
+      if (!journal) {
+        journal = await tx.journal.findUnique({
+          where: { id: journalId },
+        });
+        if (journal) {
+          journalByIdCache.set(journalId, journal);
+        }
+      }
 
       if (!journal) {
         throw new Error('Required journal not found');
+      }
+
+      // Batch load missing accounts to avoid sequential queries
+      const missingAccountIds = items
+        .map((i) => i.accountId)
+        .filter((id) => id && !accountByIdCache.has(id));
+
+      if (missingAccountIds.length > 0) {
+        const uniqueIds = [...new Set(missingAccountIds)];
+        const fetchedAccounts = await tx.account.findMany({
+          where: { id: { in: uniqueIds } },
+        });
+        fetchedAccounts.forEach((acc) => accountByIdCache.set(acc.id, acc));
       }
 
       let totalDebit = money(0);
@@ -49,9 +71,7 @@ export const accountingService = {
           throw new Error('Account ID is required for each item');
         }
 
-        const account = await tx.account.findUnique({
-          where: { id: item.accountId },
-        });
+        const account = accountByIdCache.get(item.accountId);
 
         if (!account) {
           throw new Error('Required account not found');
@@ -132,7 +152,7 @@ export const accountingService = {
       return execute(txClient);
     }
 
-    return prisma.$transaction(execute, { timeout: 15000 });
+    return prisma.$transaction(execute, { maxWait: 15000, timeout: 60000 });
   },
 
   async getAllJournalEntries() {
@@ -211,19 +231,69 @@ export const accountingService = {
     });
   },
 
-  async getCompleteLedger() {
-    const accounts = await prisma.account.findMany({
-      orderBy: { name: 'asc' },
-    });
+  async updateJournalEntry(id, data = {}) {
+    const update = {};
+    if (data.reference !== undefined) update.reference = data.reference || null;
+    if (data.date !== undefined) update.date = new Date(data.date);
 
-    const lines = [];
-
-    for (const account of accounts) {
-      const accountLines = await this.getLedgerForAccount(account.id);
-      lines.push(...accountLines);
+    if (Object.keys(update).length === 0) {
+      throw new Error('Reference or date is required');
     }
 
-    return lines;
+    return prisma.journalEntry.update({
+      where: { id },
+      data: update,
+      include: {
+        journal: true,
+        items: { include: { account: true } },
+      },
+    });
+  },
+
+  async getCompleteLedger() {
+    const items = await prisma.journalItem.findMany({
+      include: {
+        entry: {
+          include: {
+            journal: true,
+          },
+        },
+        account: true,
+      },
+      orderBy: [
+        { account: { name: 'asc' } },
+        { entry: { date: 'asc' } },
+        { id: 'asc' },
+      ],
+    });
+
+    const balances = new Map();
+    return items.map((item) => {
+      const debit = money(item.debit);
+      const credit = money(item.credit);
+      const type = (item.account.type || '').toLowerCase();
+      const previous = balances.get(item.account.id) || money(0);
+      const balance = type === 'asset' || type === 'expense'
+        ? previous.plus(debit).minus(credit)
+        : previous.minus(debit).plus(credit);
+
+      balances.set(item.account.id, balance);
+
+      return {
+        accountId: item.account.id,
+        account: item.account.name,
+        accountName: item.account.name,
+        accountType: item.account.type,
+        date: item.entry.date,
+        journal: item.entry.journal.name,
+        journalName: item.entry.journal.name,
+        reference: item.entry.reference,
+        debit: moneyStr(item.debit),
+        credit: moneyStr(item.credit),
+        runningBalance: moneyStr(balance),
+        balance: moneyStr(balance),
+      };
+    });
   },
 
   async getLedgerGroupedByAccount() {

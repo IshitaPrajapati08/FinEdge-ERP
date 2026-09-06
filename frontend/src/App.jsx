@@ -18,7 +18,10 @@ import PaymentsPage from './pages/PaymentsPage';
 import JournalEntriesPage from './pages/JournalEntriesPage';
 import ReportsPage from './pages/ReportsPage';
 import AiInvoiceScannerPage from './pages/AiInvoiceScannerPage';
+<<<<<<< Updated upstream
 import UsersPage from './pages/UsersPage';
+=======
+>>>>>>> Stashed changes
 import LoginPage from './pages/LoginPage';
 import { authUtils } from './utils/auth';
 import dayBg from './assets/backgrounds/finedge-day.webp';
@@ -93,14 +96,20 @@ function App() {
 
   const handleAuthSuccess = (user) => {
     const role = String(user?.role || 'admin').toLowerCase();
+<<<<<<< Updated upstream
     
     // Update all state synchronously
+=======
+>>>>>>> Stashed changes
     setIsAuthenticated(true);
     setSessionUser(user);
     setCurrentUser(role);
     setCurrentUserId(user?.id ?? null);
+<<<<<<< Updated upstream
     
     // Navigate to dashboard
+=======
+>>>>>>> Stashed changes
     setCurrentPage(PAGES.DASHBOARD);
   };
 
@@ -115,9 +124,17 @@ function App() {
   useEffect(() => {
     let cancelled = false;
 
+<<<<<<< Updated upstream
     // If sessionUser is already stored, ensure currentUserId is in sync
     if (sessionUser?.id) {
       setCurrentUserId(sessionUser.id);
+=======
+    if (sessionUser?.id) {
+      setCurrentUserId(sessionUser.id);
+      return () => {
+        cancelled = true;
+      };
+>>>>>>> Stashed changes
     }
 
     usersAPI
@@ -144,7 +161,7 @@ function App() {
     return () => {
       cancelled = true;
     };
-  }, [currentUser]);
+  }, [currentUser, sessionUser?.id]);
 
   // ── Page renderer ─────────────────────────────────────────────────────────
   const renderPage = () => {
@@ -221,6 +238,7 @@ function App() {
           currentPage={currentPage}
           currentUser={currentUser}
           onUserChange={setCurrentUser}
+          onNavigate={setCurrentPage}
           isNight={isNight}
           onBgToggle={toggleBg}
           sessionUser={sessionUser}

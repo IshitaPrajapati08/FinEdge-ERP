@@ -126,7 +126,7 @@ Extraction guidelines:
 5. Parse line items carefully with item name, quantity, unit price, and total.
 6. Do NOT include markdown code fences (\`\`\`json or \`\`\`). Return ONLY the pure JSON string.`;
 
-  const completion = await groq.chat.completions.create({
+  const request = {
     model,
     messages: [
       { role: 'system', content: systemPrompt },
@@ -140,8 +140,20 @@ Extraction guidelines:
     ],
     temperature: 0.1,
     max_tokens: 1024,
-    response_format: { type: 'json_object' },
-  });
+  };
+
+  let completion;
+  try {
+    completion = await groq.chat.completions.create({
+      ...request,
+      response_format: { type: 'json_object' },
+    });
+  } catch (error) {
+    if (error?.status !== 400 && error?.code !== 'json_validate_failed') {
+      throw error;
+    }
+    completion = await groq.chat.completions.create(request);
+  }
 
   const rawJson = completion.choices[0]?.message?.content;
   if (!rawJson) {

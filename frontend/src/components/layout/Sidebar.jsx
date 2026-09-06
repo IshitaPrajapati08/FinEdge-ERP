@@ -70,8 +70,75 @@ const NAV_GROUPS = [
   },
 ];
 
+<<<<<<< Updated upstream
 /* ── Inner content — shared between desktop aside & mobile drawer ── */
 function SidebarContent({ currentPage, onNavigate, onClose, aiOpen, onAiToggle, currentUser, onLogout }) {
+=======
+/* ── Theme hook — syncs with the existing localStorage toggle ──── */
+function useIsNight() {
+  const [isNight, setIsNight] = useState(
+    () => typeof window !== 'undefined' && localStorage.getItem('finedge-bg') === 'night'
+  );
+
+  useEffect(() => {
+    const sync = () => {
+      const night = localStorage.getItem('finedge-bg') === 'night';
+      setIsNight(prev => prev !== night ? night : prev);
+    };
+    const interval = setInterval(sync, 250);
+    window.addEventListener('storage', sync);
+    return () => { clearInterval(interval); window.removeEventListener('storage', sync); };
+  }, []);
+
+  return isNight;
+}
+
+/* ── Design tokens derived from theme ─────────────────────────── */
+function useTokens(isNight) {
+  return {
+    /* Floating panel surface */
+    panelBg:        isNight ? 'rgba(18, 22, 26, 0.58)' : 'rgba(246, 241, 234, 0.58)',
+    panelBorder:    isNight ? 'rgba(245, 242, 236, 0.10)' : 'rgba(220, 210, 195, 0.55)',
+    panelShadow:    isNight
+      ? '0 8px 40px rgba(0,0,0,0.55), 0 2px 8px rgba(0,0,0,0.30)'
+      : '0 8px 40px rgba(40,30,20,0.12), 0 2px 8px rgba(40,30,20,0.06)',
+
+    /* Dividers */
+    divider:        isNight ? 'rgba(245,242,236,0.08)' : 'rgba(210,200,185,0.45)',
+
+    /* Text */
+    textBrand:      isNight ? '#E8E4DC' : '#1a1714',
+    textSub:        isNight ? '#7A7570' : '#9a9080',
+    textSection:    isNight ? '#5A5550' : '#b0a898',
+    textNav:        isNight ? '#C8C4BC' : '#4a4540',
+    textNavMuted:   isNight ? '#6A6560' : '#9a9080',
+    textQuote:      isNight ? '#C8C4BC' : '#4a4540',
+
+    /* Nav item states */
+    navHoverBg:     isNight ? 'rgba(255,255,255,0.07)' : 'rgba(15,106,75,0.08)',
+    navActiveBg:    '#0F6A4B',
+    navActiveText:  '#fff',
+    navActiveGlow:  '0 2px 10px rgba(15,106,75,0.38)',
+
+    /* AI button */
+    aiBtnBg:        isNight ? 'rgba(255,255,255,0.06)' : 'rgba(15,106,75,0.08)',
+    aiBtnBorder:    isNight ? 'rgba(255,255,255,0.10)' : 'rgba(15,106,75,0.20)',
+    aiBtnHoverBg:   isNight ? 'rgba(52,211,153,0.10)' : 'rgba(15,106,75,0.14)',
+    aiBtnOpenBg:    'linear-gradient(135deg,#0F6A4B,#1a8a60)',
+
+    /* Scrollbar */
+    scrollThumb:    isNight ? 'rgba(255,255,255,0.12)' : 'rgba(15,106,75,0.18)',
+
+    /* Mobile hamburger */
+    hamburgerBg:    isNight ? 'rgba(18,22,26,0.72)' : 'rgba(246,241,234,0.80)',
+  };
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SidebarContent — inner layout, shared by desktop & mobile
+═══════════════════════════════════════════════════════════════ */
+function SidebarContent({ currentPage, onNavigate, onClose, aiOpen, onAiToggle, currentUser, isNight, t, onLogout }) {
+>>>>>>> Stashed changes
   const rawRole = typeof currentUser === 'object' ? currentUser?.role : currentUser;
   const role = String(rawRole || '').toLowerCase().trim();
   const isAuthorizedRole = role === 'admin' || role === 'accountant';
@@ -207,6 +274,7 @@ function SidebarContent({ currentPage, onNavigate, onClose, aiOpen, onAiToggle, 
           )}
         </button>
 
+<<<<<<< Updated upstream
         {onLogout && (
           <button
             onClick={() => { onLogout(); onClose?.(); }}
@@ -221,12 +289,46 @@ function SidebarContent({ currentPage, onNavigate, onClose, aiOpen, onAiToggle, 
             onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
           >
             <LogOut size={13} />
+=======
+        {/* Sign Out button */}
+        {onLogout && (
+          <button
+            type="button"
+            onClick={() => { onLogout(); onClose?.(); }}
+            style={{
+              width: '100%',
+              display: 'flex', alignItems: 'center', gap: 10,
+              padding: '8px 12px',
+              borderRadius: 12,
+              border: isNight ? '1px solid rgba(220,38,38,0.30)' : '1px solid rgba(220,38,38,0.22)',
+              cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit',
+              fontSize: 12.5, fontWeight: 600, outline: 'none',
+              marginBottom: 12,
+              background: 'transparent',
+              color: '#dc2626',
+              transition: 'background 0.15s ease',
+            }}
+            onMouseEnter={e => e.currentTarget.style.background = isNight ? 'rgba(220,38,38,0.12)' : '#fef2f2'}
+            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+          >
+            <LogOut size={14} />
+>>>>>>> Stashed changes
             <span>Sign Out</span>
           </button>
         )}
 
+<<<<<<< Updated upstream
         <p className="text-[11px] italic leading-relaxed"
            style={{ color: '#b0a898' }}>
+=======
+        {/* Quote */}
+        <p style={{
+          margin: '0 0 8px',
+          padding: '0 4px',
+          fontSize: 10.5, fontStyle: 'italic',
+          lineHeight: 1.6, color: t.textQuote,
+        }}>
+>>>>>>> Stashed changes
           "Numbers move futures.<br />Every entry counts."
         </p>
         <div className="mt-3 flex items-center gap-2">
@@ -240,7 +342,13 @@ function SidebarContent({ currentPage, onNavigate, onClose, aiOpen, onAiToggle, 
   );
 }
 
+<<<<<<< Updated upstream
 /* ── Main export ───────────────────────────────────────────────── */
+=======
+/* ═══════════════════════════════════════════════════════════════
+   Sidebar — floating matte glass panel, 16px margin from edges
+═══════════════════════════════════════════════════════════════ */
+>>>>>>> Stashed changes
 export default function Sidebar({ currentPage, onNavigate, aiOpen, onAiToggle, currentUser, onLogout }) {
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -257,6 +365,11 @@ export default function Sidebar({ currentPage, onNavigate, aiOpen, onAiToggle, c
           aiOpen={aiOpen}
           onAiToggle={onAiToggle}
           currentUser={currentUser}
+<<<<<<< Updated upstream
+=======
+          isNight={isNight}
+          t={t}
+>>>>>>> Stashed changes
           onLogout={onLogout}
         />
       </aside>
@@ -301,6 +414,11 @@ export default function Sidebar({ currentPage, onNavigate, aiOpen, onAiToggle, c
             aiOpen={aiOpen}
             onAiToggle={onAiToggle}
             currentUser={currentUser}
+<<<<<<< Updated upstream
+=======
+            isNight={isNight}
+            t={t}
+>>>>>>> Stashed changes
             onLogout={onLogout}
           />
         </aside>

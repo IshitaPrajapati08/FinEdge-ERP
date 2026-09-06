@@ -30,4 +30,16 @@ router.get('/:id', async (req, res) => {
   }
 });
 
+router.patch('/:id', async (req, res) => {
+  try {
+    const entry = await accountingService.updateJournalEntry(
+      parseInt(req.params.id),
+      req.body
+    );
+    res.json(entry);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
 export default router;
